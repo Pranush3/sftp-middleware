@@ -5,7 +5,7 @@ const path = require('path');
 const Client = require('ssh2-sftp-client');
 const app = express();
 const port = process.env.PORT || 10000;
-const passPhrase = 'Sai@12345'
+const passphrase = 'Sai@12345'
 
 app.use(bodyParser.json({ limit: '10mb' }));
 
