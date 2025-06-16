@@ -5,6 +5,7 @@ const path = require('path');
 const Client = require('ssh2-sftp-client');
 const app = express();
 const port = process.env.PORT || 10000;
+const passPhrase = 'Sai@12345'
 
 app.use(bodyParser.json({ limit: '10mb' }));
 
@@ -27,7 +28,7 @@ app.post('/upload', async (req, res) => {
       port: parseInt(ftpPort) || 22,
       username: ftpUsername,
       privateKey: fs.readFileSync(privateKeyPath),
-      passphrase: passphrase || Sai@12345
+      passphrase: passphrase
     });
 
     // Example: dummy content for upload
