@@ -1,45 +1,41 @@
 const express = require('express');
-const SFTPClient = require('ssh2-sftp-client');
+const bodyParser = require('body-parser');
 const fs = require('fs');
 const path = require('path');
+const Client = require('ssh2-sftp-client');
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 10000;
 
-app.use(express.json({ limit: '10mb' }));
+app.use(bodyParser.json({ limit: '10mb' }));
 
-app.post('/sftp-upload', async (req, res) => {
-  const { filename, data } = req.body;
+app.post('/upload', async (req, res) => {
+  const { ftpHost, ftpPort, ftpUsername, ftpPassword, filename, fileData } = req.body;
 
-  if (!filename || !data) {
-    return res.status(400).send({ error: 'Missing filename or data' });
+  if (!ftpHost || !ftpUsername || !ftpPassword || !filename || !fileData) {
+    return res.status(400).send('Missing required fields');
   }
 
-  const buffer = Buffer.from(data, 'base64');
-  const tempPath = path.join(__dirname, filename);
-  fs.writeFileSync(tempPath, buffer);
-
-  const sftp = new SFTPClient();
-  const sftpConfig = {
-    host: 'mcmt-7nv1q6hv3gxktfpbqxjzrby.ftp.marketingcloudops.com',
-    port: 22,
-    username: '100012007_9',
-    password: 'Sai@12345',
-    privateKey: fs.readFileSync(path.join(__dirname, 'SFTP Private key.ppk')),
-    passphrase: 'Sai@12345',
-  };
+  const sftp = new Client();
+  const buffer = Buffer.from(fileData, 'base64');
 
   try {
-    await sftp.connect(sftpConfig);
-    await sftp.put(tempPath, '/Import/opportunities.csv');
+    await sftp.connect({
+      host: ftpHost,
+      port: parseInt(ftpPort) || 22,
+      username: ftpUsername,
+      password: ftpPassword,
+    });
+
+    await sftp.put(buffer, `/upload/${filename}`);
     await sftp.end();
-    fs.unlinkSync(tempPath);
-    res.send({ message: 'Upload successful' });
+
+    res.send('File uploaded successfully!');
   } catch (err) {
-    console.error('SFTP Error:', err);
-    res.status(500).send({ error: 'SFTP upload failed', details: err.message });
+    console.error(err);
+    res.status(500).send('SFTP upload failed');
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
