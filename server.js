@@ -34,7 +34,7 @@ app.post('/upload', async (req, res) => {
       port: parseInt(ftpPort) || 22,
       username: ftpUsername,
       privateKey: privateKey,
-      passphrase: passphrase || '' // supply your passphrase here if encrypted
+      passphrase: passphrase || 'Sai@12345' // supply your passphrase here if encrypted
     });
 
     await sftp.put(buffer, `/upload/${filename}`);
